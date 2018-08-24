@@ -15,8 +15,9 @@ import java.io.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
-public class FinalBuild extends JPanel implements MouseListener {
+public class Refactoring extends JPanel implements MouseListener {
 
     static String vLines = JOptionPane.showInputDialog(null, "How many strings?");
     static String hLines = JOptionPane.showInputDialog(null, "How many frets?");
@@ -25,12 +26,12 @@ public class FinalBuild extends JPanel implements MouseListener {
     static BufferedReader in = null;
     static PrintWriter out = null;
     static File source = new File("DataFile.txt");
-    static int[][] circleArray = new int[10][10];
+    static int[][] circleArray = new int[26][26];
     static JPanel bottomPanel;
     static Container parent;
     static JPanel contentPanel;
     static JPanel fingerPanel;
-    static JButton resetButton = new JButton("Paint");
+    static JButton chooseButton = new JButton("Chord");
     static JButton resetAll = new JButton("Clear");
     static JButton chooseColor1 = new JButton("Top");
     static JButton chooseColor2 = new JButton("Bottom");
@@ -46,17 +47,31 @@ public class FinalBuild extends JPanel implements MouseListener {
     static JTextField chordName = new JTextField();
     static JTextField chordOffset = new JTextField();
     static JFrame chordFrame;
+
+    static File sourceFile = new File("chords.txt");
+     static File sourceFile1 = new File("chordsUke.txt");
+    static JComboBox chord = new JComboBox();
+     static JComboBox chordUke = new JComboBox();
+    static String[][] chordVar = new String[1000][15];
+
+
+    final static String[] guitars = { "Guitar", "Uke" };
+    static JComboBox guitOrUke = new JComboBox(guitars);
+    static int chordVarCounter = 0;
+    static int chordVarCounterUke = 0;
     ////////////////////////////////////////////////
 
     public static void main(String args[]) {
         System.setProperty("awt.useSystemAAFontSettings", "on");
         System.setProperty("swing.aatext", "true");
-        new FinalBuild();
+        new Refactoring();
     }
     ////gggg
 
-    public FinalBuild() {
+    public Refactoring() {
 
+        AutoCompleteDecorator.decorate(chord);
+         AutoCompleteDecorator.decorate(chord);
         System.setProperty("awt.useSystemAAFontSettings", "on");
         System.setProperty("swing.aatext", "true");
         // TODO code application logic here
@@ -80,7 +95,8 @@ public class FinalBuild extends JPanel implements MouseListener {
 
         fingerPanel.setLayout(layout);
 
-        bottomPanel.add(resetButton);
+
+        bottomPanel.add(chooseButton);
         bottomPanel.add(chordName);
         bottomPanel.add(chordOffset);
         bottomPanel.add(resetAll);
@@ -108,20 +124,207 @@ public class FinalBuild extends JPanel implements MouseListener {
 
         // chordFrame.add(BorderLayout.SOUTH);
         contentPanel = (JPanel) chordFrame.getContentPane();
-        resetButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String chordNameString = chordName.getText();
-                String chordOffsetString = chordOffset.getText();
-                ChordPanel.chordNamePanel = chordNameString;
-                ChordPanel.chordOffsetPanel = chordOffsetString;
+        chooseButton.addActionListener((ActionEvent e) -> {
+             JOptionPane.showMessageDialog(null, guitOrUke, "Choose the instrument", JOptionPane.QUESTION_MESSAGE);
+               int chosenInstrument = guitOrUke.getSelectedIndex();
+               System.out.println(chosenInstrument);
+
+               if(chosenInstrument == 0 ){
+
+                   matchInstrument(chosenInstrument);
+
+
+            String line = "";
+            readChords(line, chordVar);
+            JOptionPane.showMessageDialog(null, chord, "Choose a chord", JOptionPane.QUESTION_MESSAGE);
+            String chosenChord = (String) chord.getSelectedItem();
+            chordName.setText(chosenChord);
+            int chosenIndex = chord.getSelectedIndex();
+             JComboBox chordVarJCombo = new JComboBox(chordVar[chosenIndex]);
+            JOptionPane.showMessageDialog(null, chordVarJCombo, "Choose The variation", JOptionPane.QUESTION_MESSAGE);
+            String chosenVariation = (String) chordVarJCombo.getSelectedItem();
+
+            String[] splitVariation = chosenVariation.split(",");
+            int[] splitVariationInt = new int[10];
+
+            for (int q = 0; q < verticalLines + 1; q++) {
+                for (int z = 0; z < horizontalLines + 1; z++) {
+                    circleArray[q][z] = 0;
+                }
 
             }
+            for (int a = 0; a < 6; a++) {
+                try {
+                    splitVariationInt[a] = Integer.parseInt(splitVariation[a]);
+
+                } catch (NumberFormatException d) {
+                    splitVariationInt[a] = 0;
+                }
+                //System.out.println(splitVariationInt[a]);
+                circleArray[splitVariationInt[a]][a] = 1;
+            }
+            int max = 0;
+            int min = horizontalLines;
+            System.out.println(horizontalLines);
+            for(int a = 0; a < 6; a ++){
+                if( splitVariationInt[a] > max){
+                    max =  splitVariationInt[a];
+                }
+                if(splitVariationInt[a] < min && splitVariationInt[a] != 0){
+
+                    min = splitVariationInt[a];
+                }
+
+            }
+            System.out.println(min);
+            System.out.println(max);
+             chordOffset.setText("");
+            if(max > horizontalLines){
+
+
+                for (int q = 0; q < verticalLines + 1; q++) {
+                for (int z = 0; z < horizontalLines + 1; z++) {
+                    circleArray[q][z] = 0;
+                }
+                }
+
+
+                int offset = (max -  min)  ;
+                chordOffset.setText(""+(min));
+                for(int a = 0; a < 6; a ++){
+                    splitVariationInt[a] -= (min - 1);
+
+                    try{
+                      circleArray[splitVariationInt[a]][a] = 1;
+                    } catch(ArrayIndexOutOfBoundsException q){
+                        //???do stuff or no
+                    }
+
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        } else if(chosenInstrument == 1){
+            matchInstrument(chosenInstrument);
+
+            chordVarCounterUke = 0;
+           String[][] chordVarUke = new String[1000][10];
+             String lineUke = "";
+             int innerCounter = 0;
+
+             readChordsUke(lineUke,innerCounter,chordVarUke);
+
+
+            JOptionPane.showMessageDialog(null, chordUke, "Choose a chord", JOptionPane.QUESTION_MESSAGE);
+            String chosenChord = (String) chordUke.getSelectedItem();
+            chordName.setText(chosenChord);
+            int chosenIndex = chordUke.getSelectedIndex();
+               JComboBox chordVarUkeJCombo = new JComboBox(chordVarUke[chosenIndex]);
+            JOptionPane.showMessageDialog(null, chordVarUkeJCombo, "Choose The variation", JOptionPane.QUESTION_MESSAGE);
+            String chosenVariation = (String) chordVarUkeJCombo.getSelectedItem();
+
+            String[] splitVariation = chosenVariation.split(",");
+            int[] splitVariationInt = new int[10];
+
+            for (int q = 0; q < verticalLines + 1; q++) {
+                for (int z = 0; z < horizontalLines + 1; z++) {
+                    circleArray[q][z] = 0;
+                }
+
+            }
+            for (int a = 0; a < 4; a++) {
+                try {
+                    splitVariationInt[a] = Integer.parseInt(splitVariation[a]);
+
+                } catch (NumberFormatException d) {
+                    splitVariationInt[a] = 0;
+                }
+                //System.out.println(splitVariationInt[a]);
+                circleArray[splitVariationInt[a]][a] = 1;
+            }
+            int max = 0;
+            int min = horizontalLines;
+            System.out.println(horizontalLines);
+            for(int a = 0; a < 6; a ++){
+                if( splitVariationInt[a] > max){
+                    max =  splitVariationInt[a];
+                }
+                if(splitVariationInt[a] < min && splitVariationInt[a] != 0){
+
+                    min = splitVariationInt[a];
+                }
+
+            }
+            System.out.println(min);
+            System.out.println(max);
+             chordOffset.setText("");
+            if(max > horizontalLines){
+
+
+                for (int q = 0; q < verticalLines + 1; q++) {
+                for (int z = 0; z < horizontalLines + 1; z++) {
+                    circleArray[q][z] = 0;
+                }
+                }
+
+
+                int offset = (max -  min)  ;
+                chordOffset.setText(""+(min));
+                for(int a = 0; a < 6; a ++){
+                    splitVariationInt[a] -= (min - 1);
+
+                    try{
+                      circleArray[splitVariationInt[a]][a] = 1;
+                    } catch(ArrayIndexOutOfBoundsException q){
+                        //???do stuff or no
+                    }
+
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        }
+            //System.out.println(chosenVariation);
         });
 
         resetAll.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                for (int a = 0; a < verticalLines; a++) {
-                    for (int b = 0; b < horizontalLines; b++) {
+                for (int a = 0; a < verticalLines + 1; a++) {
+                    for (int b = 0; b < horizontalLines + 1; b++) {
                         circleArray[a][b] = 0;
                     }
 
@@ -231,7 +434,7 @@ public class FinalBuild extends JPanel implements MouseListener {
 
                 }
                 JComboBox c = new JComboBox(presetList);
-
+                AutoCompleteDecorator.decorate(c);
                 JOptionPane.showMessageDialog(null, c, "Select the preset", JOptionPane.QUESTION_MESSAGE);
                 String chosenPreset = (String) c.getSelectedItem();
                 System.out.println(chosenPreset);
@@ -293,6 +496,109 @@ public class FinalBuild extends JPanel implements MouseListener {
         });
 
     }
+public void matchInstrument(int choice){
+
+     for (int q = 0; q < verticalLines + 1; q++) {
+                for (int z = 0; z < horizontalLines + 1; z++) {
+                    circleArray[q][z] = 0;
+                }
+
+            }
+   if(choice == 1){
+       verticalLines = 4;
+       horizontalLines = 5;
+
+   } else if(choice == 0){
+        verticalLines = 6;
+       horizontalLines = 6;
+   }
+
+}
+
+
+    public void readChords(String line, String[][] chordVar){
+        int innerCounter1 = 0;
+            try {
+                FileReader fileReader = new FileReader("chords.txt");
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+                while ((line = bufferedReader.readLine()) != null) {
+
+                    if (line.contains("],")) {
+                        line = bufferedReader.readLine();
+                        line = line.replaceAll("\\s", "");
+                        line = line.replaceAll("\"", "");
+                        line = line.replaceAll(":", "");
+                        line = line.replaceAll("\\[", "");
+                        chord.addItem(line);
+                        while (chordVarCounter < 732 && (((line = bufferedReader.readLine()).contains("},")))) {
+                            line = line.replaceAll("\\s", "");
+
+                            line = line.substring(6, line.indexOf("\","));
+                            chordVar[chordVarCounter][innerCounter1] = line;
+                            innerCounter1++;
+                        }
+                        chordVarCounter++;
+                        innerCounter1 = 0;
+                        //  System.out.println(chordVarCounter);
+                    }
+                }
+                bufferedReader.close();
+            } catch (FileNotFoundException ex) {
+                System.out.println(
+                        "Unable to open file '"
+                                + "chords.txt" + "'");
+            } catch (IOException ex) {
+                System.out.println(
+                        "Error reading file '"
+                                + "chords.txt" + "'");
+
+            }
+    }
+
+
+
+    public void readChordsUke(String lineUke, int innerCounter, String[][] chordVarUke){
+         try {
+                FileReader fileReaderUke = new FileReader("chordsUke.txt");
+                BufferedReader bufferedReaderUke = new BufferedReader(fileReaderUke);
+
+                while ((lineUke = bufferedReaderUke.readLine()) != null) {
+
+                    if (lineUke.contains("],")) {
+                        lineUke = bufferedReaderUke.readLine();
+                        lineUke = lineUke.replaceAll("\\s", "");
+                        lineUke = lineUke.replaceAll("\"", "");
+                        lineUke = lineUke.replaceAll(":", "");
+                        lineUke = lineUke.replaceAll("\\[", "");
+                        chordUke.addItem(lineUke);
+                        while (chordVarCounterUke < 545 && (((lineUke = bufferedReaderUke.readLine()).contains("},")))) {
+                            lineUke = lineUke.replaceAll("\\s", "");
+
+                            lineUke = lineUke.substring(6, lineUke.indexOf("\","));
+                            chordVarUke[chordVarCounterUke][innerCounter] = lineUke;
+                            innerCounter++;
+                        }
+                        chordVarCounterUke++;
+                        innerCounter = 0;
+                          System.out.println(chordVarCounterUke);
+                    }
+                }
+
+                bufferedReaderUke.close();
+            } catch (FileNotFoundException ex) {
+                System.out.println(
+                        "Unable to open file '"
+                                + "chords.txt" + "'");
+            } catch (IOException ex) {
+                System.out.println(
+                        "Error reading file '"
+                                + "chords.txt" + "'");
+
+            }
+    }
+
+
 
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -361,7 +667,7 @@ class ChordPanel extends JPanel implements Runnable {
 
     static String chordNamePanel = "";
     static String chordOffsetPanel = "";
-    static boolean gay = false;
+
     Font customFont;
     final static BasicStroke stroke = new BasicStroke(0.5f);
     static boolean[] circleBool = new boolean[100];
@@ -384,9 +690,9 @@ class ChordPanel extends JPanel implements Runnable {
 
     public void drawCircles(int vertical, int horizontal, Graphics2D g2) {
 
-        for (int a = 0; a < vertical + 1; a++) {
+        for (int a = 1; a < vertical + 1; a++) {
             for (int b = 0; b < horizontal + 1; b++) {
-                if (FinalBuild.circleArray[a][b] == 1) {
+                if (Refactoring.circleArray[a][b] == 1) {
                     g2.fillOval(13 + b * 251 / (horizontal - 1), (a - 1) * 555 / vertical + ((555 / (vertical)) / 2 + 72 - 13), 26, 26);
 
                 }
@@ -394,14 +700,14 @@ class ChordPanel extends JPanel implements Runnable {
         }
 
         // 4/13 = 6/
-        for (int a = 0; a < vertical + 1; a++) {
+        for (int a = 1; a < vertical + 1; a++) {
             for (int b = 0; b < horizontal + 1; b++) {
-                if (FinalBuild.circleArray[a][b] == 1) {
+                if (Refactoring.circleArray[a][b] == 1) {
 
                     g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
                     g2.setColor(java.awt.Color.BLACK);
                     g2.drawOval(13 + b * 251 / (horizontal - 1), (a - 1) * 555 / vertical + ((555 / (vertical)) / 2 + 72 - 13), 26, 26);
-                    System.out.println((a - 1) * 555 / vertical);
+                    // System.out.println((a - 1) * 555 / vertical);
                 }
             }
         }
@@ -502,6 +808,10 @@ class ChordPanel extends JPanel implements Runnable {
     @Override
     public void paint(Graphics g) {
 
+        String chordNameString = Refactoring.chordName.getText();
+        String chordOffsetString = Refactoring.chordOffset.getText();
+        ChordPanel.chordNamePanel = chordNameString;
+        ChordPanel.chordOffsetPanel = chordOffsetString;
         Graphics2D g2 = (Graphics2D) g;
         Rectangle2D rect = new Rectangle2D.Float();
         rect.setRect(0f, 0f, 300f, 650f);
@@ -548,13 +858,13 @@ class ChordPanel extends JPanel implements Runnable {
         g2.drawString(chordOffsetPanel, 3, 94);
 
         g2.setColor(java.awt.Color.BLACK);
-        drawGrid(FinalBuild.horizontalLines, FinalBuild.verticalLines, g2);
+        drawGrid(Refactoring.horizontalLines, Refactoring.verticalLines, g2);
 
         gp = new GradientPaint(100f, 0f, color2, 100f, 650f, color1);
 
         g2.setPaint(gp);
 
-        drawCircles(FinalBuild.horizontalLines, FinalBuild.verticalLines, g2);
+        drawCircles(Refactoring.horizontalLines, Refactoring.verticalLines, g2);
         //////////////
 
         /////////////////////////////
@@ -591,13 +901,13 @@ class ChordPanel extends JPanel implements Runnable {
     static public void save() {
         try {
             // retrieve image
-            String fileName = FinalBuild.chordName.getText();
+            String fileName = Refactoring.chordName.getText();
             fileName += ".png";
-            BufferedImage bi = createImage(FinalBuild.contentPanel);
+            BufferedImage bi = createImage(Refactoring.contentPanel);
             File outputfile = new File(fileName);
             ImageIO.write(bi, "png", outputfile);
             System.out.println("Worked.");
-            JOptionPane.showMessageDialog(FinalBuild.chordFrame, FinalBuild.errorobject, "File saved", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(Refactoring.chordFrame, Refactoring.errorobject, "File saved", JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException e) {
             ///
             System.out.println("Didnt work");

@@ -10,4 +10,4 @@ First make sure Java is installed on your system.
 
 3.Inside the new folder, create a folder called "lib" and place swingx-all-1.6.4 there. 
 
-4.Run Refactoring.java
+4.Run Refactoring.jar

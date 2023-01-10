@@ -1,13 +1,7 @@
 # chordGenerator
 Chord Generator
-HOW TO USE:
+Make sure you have Java installed and run the ChordGenerator app. It saves PNG files in the same directory. 
 
-First make sure Java is installed on your system. 
+![image](https://user-images.githubusercontent.com/37674127/211654324-e2f62d13-8439-49ed-b51d-477c3823ba73.png)
 
-1.Creaate a new folder on desktop.
-
-2.Put chords.txt and chordsUke.txt and font.ttf in the same folder as Refactoring.jar
-
-3.Inside the new folder, create a folder called "lib" and place swingx-all-1.6.4 there. 
-
-4.Run Refactoring.jar
+Creates Chord graphics for guitar and ukulele, great for making YouTube tutorials for songs while staying ₐₑₛₜₕₑₜᵢc

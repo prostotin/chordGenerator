@@ -1,5 +1,5 @@
-# chordGenerator
 Chord Generator
+
 Make sure you have Java installed and run the ChordGenerator app. It saves PNG files in the same directory. 
 You can customize amount of strings, frets, create custom chords by clicking on the position of the pressed fret, save and load presets, change color schemes. Enjoy. 
 

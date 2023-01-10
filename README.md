@@ -6,3 +6,5 @@ You can customize amount of strings, frets, create custom chords by clicking on 
 ![image](https://user-images.githubusercontent.com/37674127/211654624-34a7b3be-2111-4c78-80d4-65eb47b31e52.png)
 
 Creates Chord graphics for guitar and ukulele, great for making YouTube tutorials for songs while staying ₐₑₛₜₕₑₜᵢc
+
+//This was made 4 years ago
